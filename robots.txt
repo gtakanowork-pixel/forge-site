@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://gtakanowork-pixel.github.io/forge-site/sitemap.xml
