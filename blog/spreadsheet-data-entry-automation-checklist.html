@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Excel・スプレッドシートの転記を自動化する前のチェックリスト — Forge</title>
+<meta name="description" content="Excel・Googleスプレッドシートへの手入力や転記を自動化する前に確認したい7項目。重複登録、例外、個人情報、承認、費用対効果を実務目線で整理します。">
+<link rel="canonical" href="https://gtakanowork-pixel.github.io/forge-site/blog/spreadsheet-data-entry-automation-checklist.html">
+<link rel="stylesheet" href="../assets/style.css">
+<meta property="og:type" content="article"><meta property="og:title" content="Excel・スプレッドシートの転記を自動化する前のチェックリスト — Forge"><meta property="og:description" content="自動化する前に、重複・例外・権限・復旧まで確認。小さく安全に始めるための実務チェック。"><meta property="og:url" content="https://gtakanowork-pixel.github.io/forge-site/blog/spreadsheet-data-entry-automation-checklist.html">
+</head>
+<body>
+<header class="nav wrap"><a class="brand" href="../"><span class="mark">F</span>FORGE</a><nav><a href="../#services">Services</a><a href="./">Journal</a><a class="nav-cta" href="../ai-automation-audit.html">3分診断</a></nav></header>
+<main class="article wrap">
+<a class="back" href="./">← JOURNAL</a>
+<p class="meta">2026.10.11 · AI OPERATIONS</p>
+<h1>Excel・スプレッドシートの転記を、<br>自動化する前のチェックリスト。</h1>
+<p class="lead">フォームの回答を表に写す、注文情報を別の管理表に移す、毎週同じ数字を集計する。こうした作業は自動化の候補です。ただし「転記できる」だけでは運用に耐えません。最初に確認したいのは、間違えたときに気づき、戻せるかです。</p>
+<h2>まず「1つの転記」を図にする</h2>
+<p>例として、社内の申請フォームからスプレッドシートへ転記する業務を考えます。入力元、転記先、担当者、発生頻度、処理の完了条件を1行ずつ書き出します。外部顧客の個人情報ではなく、架空データや匿名化したテスト行で試してください。</p>
+<h2>実装前に確認する7項目</h2>
+<ol>
+<li><strong>入力元は決まっているか。</strong> メール、フォーム、CSVなど複数経路がある場合は、最初は1経路だけに絞る。</li>
+<li><strong>列の対応が明確か。</strong> 日付形式、空欄、全角半角、必須項目の扱いを決める。</li>
+<li><strong>重複登録を防げるか。</strong> 同じ申請を再処理しても二重に行が増えない識別方法を設計する。</li>
+<li><strong>例外を止められるか。</strong> 不正な形式や欠損値を、黙って成功扱いせず確認待ちにする。</li>
+<li><strong>権限は最小限か。</strong> 自動化用の接続権限は必要なファイル・操作に限定する。秘密鍵や認証情報を表に書かない。</li>
+<li><strong>人が確認できるか。</strong> 初期運用では処理件数とエラー件数を照合し、重要な更新には承認を残す。</li>
+<li><strong>戻せるか。</strong> 誤転記した行を特定し、元データから再実行・復旧できる手順を用意する。</li>
+</ol>
+<h2>小さな試行の進め方</h2>
+<p>まず架空の10件で、正常な行・空欄・重複・形式違いを混ぜて試します。成功件数だけでなく「止まるべきデータで止まったか」を記録。次に担当者が結果を確認する形で少量を運用し、手作業より本当に速くなったかを測ります。決済、法務、安全に関わる処理は無人で確定させず、人の承認を前提にしてください。</p>
+<h2>費用対効果は、確認時間込みで計算する</h2>
+<p><strong>仮の計算例：</strong>1回12分の転記が月20回なら月4時間。自動化後も1回4分の確認が必要なら月1時間20分で、差は月2時間40分です。時間単価を仮に3,000円と置くと、時間価値は月8,000円相当。ここからツール利用料、保守、初期構築費の回収分を差し引いて判断します。これは説明用の仮定であり、Forgeの顧客実績や削減保証ではありません。</p>
+<h2>「転記しない」設計も選択肢</h2>
+<p>そもそも同じ情報を2つの表で持つ必要がなければ、入力元の一覧をそのまま参照する方が安全な場合があります。AIを入れる前に、重複入力そのものをなくせないかも確認しましょう。</p>
+<h2>最初の候補を決める</h2>
+<p>頻度が高く、手順が安定し、失敗時に戻せる業務から始めるのが基本です。Forgeの無料セルフ診断は入力・送信なしで候補を切り分けられます。費用の考え方は<a href="ai-automation-cost-roi.html">費用対効果の記事</a>も参考にしてください。</p>
+<div class="actions"><a class="button primary" href="../ai-automation-audit.html">3分で自動化候補を診断する</a><a class="button ghost" href="./">ほかの記事を見る</a></div>
+</main>
+<footer class="wrap"><div class="brand"><span class="mark">F</span>FORGE</div><p>AI employees. Human judgment.</p><p>© 2026 Forge</p></footer>
+</body></html>
