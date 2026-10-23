@@ -27,6 +27,24 @@ document.addEventListener('DOMContentLoaded', () => {
     item.setAttribute('aria-checked', String(item.getAttribute('aria-checked') !== 'true'));
     render();
   }));
+  // Sharing is initiated only by the visitor. No result is sent to Forge.
+  const copyButton = document.querySelector('#copy-audit');
+  const copyStatus = document.querySelector('#copy-status');
+  copyButton?.addEventListener('click', async () => {
+    const summary = [
+      'Forge | AI業務自動化の3分セルフ診断',
+      `判定: ${score.textContent}点`,
+      result.textContent,
+      '無料診断: https://gtakanowork-pixel.github.io/forge-site/ai-automation-audit.html'
+    ].join('\n');
+    try {
+      if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable');
+      await navigator.clipboard.writeText(summary);
+      if (copyStatus) copyStatus.textContent = '診断結果をコピーしました。共有先への貼り付けはご自身で行ってください。';
+    } catch {
+      if (copyStatus) copyStatus.textContent = 'このブラウザではコピーできません。画面の判定文を選択してコピーしてください。';
+    }
+  });
   document.querySelector('#reset-audit')?.addEventListener('click', () => {
     items.forEach(item => item.setAttribute('aria-checked', 'false'));
     render();
