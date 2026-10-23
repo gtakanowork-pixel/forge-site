@@ -5,9 +5,18 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!score || !result || items.length !== 5) return;
 
   const selected = (index) => items[index].getAttribute('aria-checked') === 'true';
+  const copyButton = document.querySelector('#copy-audit');
+  const copyStatus = document.querySelector('#copy-status');
   const render = () => {
+    const hasSelection = items.some((_, index) => selected(index));
     const points = items.reduce((sum, item, index) => sum + (selected(index) ? Number(item.dataset.points) : 0), 0);
-    score.textContent = String(points);
+    score.textContent = hasSelection ? String(points) : '—';
+    if (copyButton) copyButton.disabled = !hasSelection;
+    if (copyStatus) copyStatus.textContent = '';
+    if (!hasSelection) {
+      result.textContent = '該当する項目を選択してください。未選択の状態では判定しません。';
+      return;
+    }
 
     // Safety gates take priority over the numeric score.
     if (selected(4)) {
@@ -28,8 +37,6 @@ document.addEventListener('DOMContentLoaded', () => {
     render();
   }));
   // Sharing is initiated only by the visitor. No result is sent to Forge.
-  const copyButton = document.querySelector('#copy-audit');
-  const copyStatus = document.querySelector('#copy-status');
   copyButton?.addEventListener('click', async () => {
     const summary = [
       'Forge | AI業務自動化の3分セルフ診断',
