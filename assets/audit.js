@@ -2,19 +2,21 @@ document.addEventListener('DOMContentLoaded', () => {
   const items = [...document.querySelectorAll('[data-points]')];
   const score = document.querySelector('#score');
   const result = document.querySelector('#result');
-  if (!score || !result || items.length !== 5) return;
+  const none = document.querySelector('#audit-none');
+  if (!score || !result || items.length !== 5 || !none) return;
 
   const selected = (index) => items[index].getAttribute('aria-checked') === 'true';
+  const noMatches = () => none.getAttribute('aria-checked') === 'true';
   const copyButton = document.querySelector('#copy-audit');
   const copyStatus = document.querySelector('#copy-status');
   const render = () => {
-    const hasSelection = items.some((_, index) => selected(index));
+    const hasSelection = noMatches() || items.some((_, index) => selected(index));
     const points = items.reduce((sum, item, index) => sum + (selected(index) ? Number(item.dataset.points) : 0), 0);
     score.textContent = hasSelection ? String(points) : '—';
     if (copyButton) copyButton.disabled = !hasSelection;
     if (copyStatus) copyStatus.textContent = '';
     if (!hasSelection) {
-      result.textContent = '該当する項目を選択してください。未選択の状態では判定しません。';
+      result.textContent = '該当する項目を選択してください。当てはまる項目がない場合は「どれも当てはまらない」を選択してください。';
       return;
     }
 
@@ -33,9 +35,18 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   items.forEach(item => item.addEventListener('click', () => {
-    item.setAttribute('aria-checked', String(item.getAttribute('aria-checked') !== 'true'));
+    const next = item.getAttribute('aria-checked') !== 'true';
+    item.setAttribute('aria-checked', String(next));
+    if (next) none.setAttribute('aria-checked', 'false');
     render();
   }));
+  // Explicitly distinguish 'none apply' from an unanswered checklist.
+  none.addEventListener('click', () => {
+    const next = none.getAttribute('aria-checked') !== 'true';
+    none.setAttribute('aria-checked', String(next));
+    if (next) items.forEach(item => item.setAttribute('aria-checked', 'false'));
+    render();
+  });
   // Sharing is initiated only by the visitor. No result is sent to Forge.
   copyButton?.addEventListener('click', async () => {
     const summary = [
@@ -54,6 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   document.querySelector('#reset-audit')?.addEventListener('click', () => {
     items.forEach(item => item.setAttribute('aria-checked', 'false'));
+    none.setAttribute('aria-checked', 'false');
     render();
   });
   render();
