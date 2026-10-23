@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>問い合わせ対応をAIで自動化する前のチェックリスト｜FAQ・有人引き継ぎ・個人情報 — Forge</title>
+<meta name="description" content="問い合わせ対応のAI自動化を始める前に、FAQの範囲、有人引き継ぎ、個人情報、誤回答対策、検証指標を整理する実務チェックリスト。小規模チーム向け。">
+<link rel="canonical" href="https://gtakanowork-pixel.github.io/forge-site/blog/customer-support-ai-automation-checklist.html">
+<link rel="stylesheet" href="../assets/style.css">
+<meta property="og:type" content="article">
+<meta property="og:title" content="問い合わせ対応をAIで自動化する前のチェックリスト — Forge">
+<meta property="og:description" content="FAQを自動化する前に決めたい、回答範囲・有人引き継ぎ・個人情報・誤回答対策。">
+<meta property="og:url" content="https://gtakanowork-pixel.github.io/forge-site/blog/customer-support-ai-automation-checklist.html">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"問い合わせ対応をAIで自動化する前のチェックリスト","datePublished":"2026-10-23","author":{"@type":"Organization","name":"Forge"},"publisher":{"@type":"Organization","name":"Forge"},"mainEntityOfPage":"https://gtakanowork-pixel.github.io/forge-site/blog/customer-support-ai-automation-checklist.html"}</script>
+</head>
+<body>
+<header class="nav wrap"><a class="brand" href="../"><span class="mark">F</span>FORGE</a><nav><a href="../#services">Services</a><a href="./">Journal</a><a class="nav-cta" href="../ai-automation-audit.html">3分診断</a></nav></header>
+<main class="article wrap">
+<a class="back" href="./">← JOURNAL</a>
+<p class="meta">2026.10.23 · AI OPERATIONS</p>
+<h1>問い合わせ対応をAIで自動化する前の、<br>7つのチェックリスト。</h1>
+<p class="lead">「よくある質問はAIで返したい。でも、誤回答やクレームが怖い」。そんなときは、チャットボットの見た目より先に、<strong>答えてよい質問と、人が対応すべき質問の境界</strong>を決めることが重要です。以下は小規模チームが導入可否を検討するための一般的な設計ガイドです。実際の導入成果を示すものではありません。</p>
+
+<h2>1. まず問い合わせを3種類に分ける</h2>
+<ol>
+<li><strong>公開情報だけで答えられるもの：</strong>営業時間、送料の案内、手続きの場所など。参照元と更新担当を決めておく。</li>
+<li><strong>本人確認や個別判断が必要なもの：</strong>注文変更、返金、契約内容、個別の配送状況など。認証・権限・有人対応を前提にする。</li>
+<li><strong>正しい答えが見つからないもの：</strong>情報が古い、質問が曖昧、複数の案内が矛盾する場合。推測で埋めず、確認先を示す。</li>
+</ol>
+<p>「AIが何でも答える」ではなく、まずは公開済みFAQに限定した案内から検討すると、責任範囲を整理しやすくなります。</p>
+
+<h2>2. 回答の根拠と更新ルールを用意する</h2>
+<p>FAQの正本となるページや文書を決め、更新日・管理担当・公開可否を確認します。価格、返品条件、受付時間など変更される情報は、古い説明が残るだけでトラブルになり得ます。参照先がない場合は「確認できない」と伝える設計にします。</p>
+
+<h2>3. 有人引き継ぎの条件を先に決める</h2>
+<p>返金・契約・安全・法的判断、本人確認が必要な依頼、怒りや緊急性の高い問い合わせ、同じ質問を繰り返しても解決しない場合は、AIだけで完結させない方針を検討します。営業時間外には、実際に提供できる連絡手段と対応目安だけを案内します。存在しない窓口や即時対応を約束しないことが大切です。</p>
+
+<h2>4. 個人情報をどう扱うか決める</h2>
+<p>氏名、住所、電話番号、注文番号などを安易にAIへ入力させない設計から始めます。外部サービスを使う場合は、利用規約、保存期間、学習利用の扱い、アクセス権、削除手順を確認してください。検証時は架空の問い合わせを使い、実在する顧客情報を投入しないでください。</p>
+
+<h2>5. 「答えられない」を正常な動作にする</h2>
+<p>適切な回答が見つからないときは、もっともらしい文章を作るより、根拠が不足していることを明示する方が安全です。公開FAQに記載のない例外条件、金額の確約、補償の判断などを勝手に生成しないよう、回答範囲と確認手順を決めます。</p>
+
+<h2>6. 公開前に架空の問い合わせで試す</h2>
+<p>正常なFAQだけでなく、FAQにない質問、古い情報を前提とした質問、曖昧な表現、返金依頼、個人情報の入力、営業時間外、強い苦情などを含むテストケースを作ります。正答した件数だけでなく、<strong>答えてはいけない質問で止まれたか</strong>も記録してください。</p>
+
+<h2>7. 「自動応答率」だけで判断しない</h2>
+<p>評価する指標は、正しい根拠を示せた割合、誤回答の件数、有人引き継ぎの適切さ、未解決の問い合わせ、運用担当の確認時間など。自動応答が増えても、誤案内や手戻りが増えるなら改善とは限りません。最初は人が回答を確認できる小さな範囲で試します。</p>
+
+<h2>導入相談の前に整理しておく5項目</h2>
+<p>次の内容を社内メモにまとめると、ツール選定や見積もりの前提が明確になります。個人名や顧客情報を書く必要はありません。</p>
+<ol>
+<li>問い合わせの入口（Web、メール、チャットなど）</li>
+<li>月あたりのおおよその件数と、よくある質問の種類</li>
+<li>回答の根拠となるFAQ・規約・社内資料の有無</li>
+<li>人に引き継ぐ条件と、対応できる時間帯</li>
+<li>避けたい失敗（誤案内、個人情報の扱い、二重対応など）</li>
+</ol>
+<p>そもそも問い合わせ件数が少ない場合は、FAQページの改善やフォームの説明追加だけで十分なこともあります。導入費用と運用時間は、<a href="ai-automation-cost-roi.html">費用対効果の考え方</a>も参考にしてください。</p>
+
+<h2>最初の一歩</h2>
+<p>自動化したい仕事がまだ曖昧なら、Forgeの<a href="../ai-automation-audit.html">無料3分セルフ診断</a>で頻度・手順・リスクを整理できます。診断はブラウザ内で完結し、入力結果をForgeへ送信・保存しません。</p>
+<div class="actions"><a class="button primary" href="../ai-automation-audit.html">3分で自動化候補を診断する</a><a class="button ghost" href="./">ほかの記事を見る</a></div>
+</main>
+<footer class="wrap"><div class="brand"><span class="mark">F</span>FORGE</div><p>AI employees. Human judgment.</p><p>© 2026 Forge</p></footer>
+</body>
+</html>
