@@ -21,7 +21,15 @@
   const button = document.getElementById('roi-calculate');
   const output = document.getElementById('roi-output');
   const ids = ['roi-count','roi-before','roi-after','roi-rate','roi-monthly','roi-setup'];
+  // A previous estimate must never appear to describe newly edited inputs.
+  let resultShown = false;
+  ids.forEach(id => document.getElementById(id).addEventListener('input', () => {
+    if (!resultShown) return;
+    resultShown = false;
+    output.textContent = '入力値が変更されました。もう一度「試算する」を押してください。';
+  }));
   button.addEventListener('click', () => {
+    resultShown = true;
     const inputs = ids.map(id => document.getElementById(id));
     const values = inputs.map(input => input.value.trim() === '' ? NaN : Number(input.value));
     if (values.some((value, i) => !Number.isFinite(value) || !inputs[i].checkValidity()) || values[0] < 1 || values[1] <= 0 || values[2] > values[1]) {
