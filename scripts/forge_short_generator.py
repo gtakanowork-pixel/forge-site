@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Forge original short: free Japanese TTS, motion graphics, synthesized BGM/SFX."""
-import argparse, math, os, subprocess, tempfile, wave
+"""Forge short renderer. Publish only after final-file audio/video QA and manual playback review."""
+import argparse, json, math, os, re, subprocess, tempfile, wave
 from pathlib import Path
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
@@ -21,6 +21,21 @@ FONT_CANDIDATES=[
 ]
 def run(cmd):
  subprocess.run(cmd,check=True,stdout=subprocess.DEVNULL,stderr=subprocess.PIPE)
+def validate_output(path):
+ # A successfully exited ffmpeg process is not proof that the final MP4 has audible audio.
+ probe=subprocess.run(['ffprobe','-v','error','-show_entries','stream=codec_type','-of','json',str(path)],capture_output=True,text=True,check=True)
+ types={s.get('codec_type') for s in json.loads(probe.stdout).get('streams',[])}
+ if not {'video','audio'}.issubset(types):
+  raise RuntimeError('Export QA failed: video or audio stream missing')
+ decoded=subprocess.run(['ffmpeg','-hide_banner','-nostdin','-i',str(path),'-vn','-af','volumedetect','-f','null','-'],capture_output=True,text=True)
+ if decoded.returncode:
+  raise RuntimeError('Export QA failed: audio decode error')
+ peak=re.search(r'max_volume:\\s*(-?[0-9.]+) dB',decoded.stderr)
+ if not peak or float(peak.group(1)) < -48:
+  raise RuntimeError('Export QA failed: audio is silent or too quiet')
+ # This verifies audio presence, not speech clarity, caption timing, or mix balance.
+ # Listen to and inspect the actual final MP4 before any public scheduling.
+
 def font(size,bold=False):
  paths=FONT_CANDIDATES if bold else FONT_CANDIDATES[1:2]+FONT_CANDIDATES[:1]+FONT_CANDIDATES[2:]
  for path in paths:
@@ -94,7 +109,7 @@ def card(d,y,num,label,sub,accent,progress):
  text(d,(95+shift,y+26),num,25,accent,bold=True)
  text(d,(166+shift,y+18),label,43,(247,247,247),bold=True)
  text(d,(166+shift,y+83),sub,22,(177,187,200))
-def render_frame(t,spans,dur):
+def render_frame(t,spans,dur,mock=False):
  im=BG.copy();d=ImageDraw.Draw(im)
  for xx in range(36,W,90):d.line((xx,80,xx,H-90),fill=(28,33,44),width=1)
  for yy in range(140,H,90):d.line((34,yy,W-34,yy),fill=(28,33,44),width=1)
@@ -149,18 +164,31 @@ def render_frame(t,spans,dur):
   rounded(d,(42,990,678,1135),(10,13,19),18,outline=(75,78,84),width=1)
   text(d,(360,1060),line,29 if seg==3 else 34,(249,250,252),bold=True,anchor='mm',spacing=8)
  d.rectangle((58,123,58+int(604*min(1,t/dur)),128),fill=(244,146,73))
+ if mock:
+  rounded(d,(40,133,680,198),(110,30,30),12)
+  text(d,(60,149),'仮音声プレビュー・公開不可',28,(255,255,255),bold=True)
  return im
 def main():
  p=argparse.ArgumentParser();p.add_argument('--mock-voice',action='store_true');p.add_argument('--output',default='assets/shorts/forge-ai-review-20261012.mp4');a=p.parse_args()
+ if a.mock_voice and not any(tag in Path(a.output).stem.lower() for tag in ('preview','mock')):
+  p.error('--mock-voice is preview-only: output filename must contain preview or mock')
  Path(a.output).parent.mkdir(parents=True,exist_ok=True)
  with tempfile.TemporaryDirectory() as td:
   work=Path(td);voice,spans=make_voice(work,a.mock_voice);dur=max(23.8,spans[-1][1]+1.4)
   audio_file(work/'mix.wav',voice,spans,dur)
   cmd=['ffmpeg','-y','-loglevel','error','-f','rawvideo','-vcodec','rawvideo','-s',f'{W}x{H}','-pix_fmt','rgb24','-r',str(FPS),'-i','-','-c:v','libx264','-preset','veryfast','-crf','24','-pix_fmt','yuv420p','-movflags','+faststart',str(work/'silent.mp4')]
   proc=subprocess.Popen(cmd,stdin=subprocess.PIPE)
-  for k in range(math.ceil(dur*FPS)):proc.stdin.write(render_frame(k/FPS,spans,dur).tobytes())
+  for k in range(math.ceil(dur*FPS)):proc.stdin.write(render_frame(k/FPS,spans,dur,a.mock_voice).tobytes())
   proc.stdin.close();rc=proc.wait()
   if rc:raise RuntimeError('ffmpeg failed: '+str(rc))
-  run(['ffmpeg','-y','-loglevel','error','-i',str(work/'silent.mp4'),'-i',str(work/'mix.wav'),'-map','0:v:0','-map','1:a:0','-c:v','copy','-c:a','aac','-b:a','160k','-shortest','-movflags','+faststart',a.output])
-  print({'output':a.output,'duration':round(dur,2),'spans':spans,'bytes':Path(a.output).stat().st_size})
+  # Stage beside the destination so a rejected export can never overwrite the last good file.
+  fd,staged_name=tempfile.mkstemp(prefix='.forge-qa-',suffix='.mp4',dir=str(Path(a.output).parent))
+  os.close(fd);staged=Path(staged_name)
+  try:
+   run(['ffmpeg','-y','-loglevel','error','-i',str(work/'silent.mp4'),'-i',str(work/'mix.wav'),'-map','0:v:0','-map','1:a:0','-c:v','copy','-c:a','aac','-b:a','160k','-shortest','-movflags','+faststart',str(staged)])
+   validate_output(staged)
+   os.replace(staged,a.output)
+  finally:
+   staged.unlink(missing_ok=True)
+  print({'output':a.output,'duration':round(dur,2),'spans':spans,'bytes':Path(a.output).stat().st_size,'qa':'audio+video streams, non-silent decoded audio; manual review still required'})
 if __name__=='__main__':main()
