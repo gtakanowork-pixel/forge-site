@@ -3,6 +3,7 @@
   "use strict";
   var events = {
     home: "home-instagram-click",
+    audit: "audit-instagram-click",
     consultation: "consultation-instagram-click",
     roi: "roi-instagram-click",
     support: "support-instagram-click"
