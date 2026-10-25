@@ -30,7 +30,7 @@ def validate_output(path):
  decoded=subprocess.run(['ffmpeg','-hide_banner','-nostdin','-i',str(path),'-vn','-af','volumedetect','-f','null','-'],capture_output=True,text=True)
  if decoded.returncode:
   raise RuntimeError('Export QA failed: audio decode error')
- peak=re.search(r'max_volume:\\s*(-?[0-9.]+) dB',decoded.stderr)
+ peak=re.search(r'max_volume:\s*(-?[0-9.]+) dB',decoded.stderr)
  if not peak or float(peak.group(1)) < -48:
   raise RuntimeError('Export QA failed: audio is silent or too quiet')
  # This verifies audio presence, not speech clarity, caption timing, or mix balance.
