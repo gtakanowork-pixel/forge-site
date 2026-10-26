@@ -22,6 +22,19 @@
 <p class="meta">FORGE SERVICES · 2026.10.24</p>
 <h1>その手作業、<br>30分で整理できるか相談する。</h1>
 <p class="lead">Forgeの「30分AI業務自動化ミニ診断」は、毎週くり返す仕事を1つ選び、AIに任せる候補と人が確認すべき工程を整理するための相談メニューです。まずは実施可能かどうか、業務の概要からご相談ください。</p>
+<section aria-labelledby="quick-contact-heading" style="margin:30px 0 46px;padding:24px;border:1px solid #51402d;background:#111113">
+<h2 id="quick-contact-heading" style="margin:0 0 16px;font-size:24px">まずは、業務の概要だけで相談できます</h2>
+<p>顧客名・社内資料・実データは不要です。下のひな形をコピーし、例の部分を自分の業務の概要に置き換えてからお送りください。実施可否・日時・料金は事前確認となります。</p>
+<pre id="consultation-template" style="white-space:pre-wrap;overflow-wrap:anywhere;padding:16px;background:#1b1b1e;border:1px solid #343438;color:#eeeae2;font:inherit;font-size:14px">AI業務自動化について相談したいです。
+・対象業務：（例：毎週の表への転記）
+・頻度：（例：週3回）
+・困っていること：（例：確認に時間がかかる）
+実施可否・日時・料金を教えてください。</pre>
+<p><button type="button" id="copy-consultation-template" class="button ghost">相談文のひな形をコピー</button></p>
+<p id="consultation-copy-status" role="status" aria-live="polite"></p>
+<p><a data-forge-instagram-outbound="consultation" class="button primary" href="https://ig.me/m/theforgejp" target="_blank" rel="noopener noreferrer">InstagramのDMで相談する ↗</a></p>
+<p><small>※ DMへの直接リンクは対応環境向けです。開けない場合はページ下部の公式プロフィールリンクをご利用ください。コピー操作は端末内で完結し、内容はForgeに送信されません。外部SNSの利用条件が適用されます。</small></p>
+</section>
 <h2>ミニ診断で整理する3つのこと</h2>
 <ol>
 <li><strong>現状の流れ：</strong>どこで転記・確認・待ち時間が発生するか。</li>
@@ -58,6 +71,24 @@
 </section>
 <p style="margin-top:36px"><a class="button ghost" href="ai-automation-audit.html">まず無料3分セルフ診断を試す →</a></p>
 </main>
+<script>
+(function () {
+  "use strict";
+  var button = document.getElementById("copy-consultation-template");
+  var template = document.getElementById("consultation-template");
+  var status = document.getElementById("consultation-copy-status");
+  if (!button || !template || !status) return;
+  button.addEventListener("click", async function () {
+    try {
+      if (!navigator.clipboard || !navigator.clipboard.writeText) throw new Error("Clipboard unavailable");
+      await navigator.clipboard.writeText(template.textContent.trim());
+      status.textContent = "ひな形をコピーしました。例を置き換え、個人情報や機密情報を含めずに送信してください。";
+    } catch (_) {
+      status.textContent = "このブラウザではコピーできません。上の文章を選択してコピーしてください。";
+    }
+  });
+}());
+</script>
 <script src="assets/consultation-click.js" defer></script>
 <footer class="wrap"><div class="brand"><span class="mark">F</span>FORGE</div><p>AI employees. Human judgment.</p><p>© 2026 Forge</p><p style="font-size:12px;line-height:1.6"><a href="https://librecounter.org/gtakanowork-pixel.github.io/show" target="_blank" rel="noopener noreferrer">ページ閲覧の集計を見る（外部・公開）↗</a><br><small>ページ閲覧数は外部のLibreCounterで集計します。ページURLと接続時の技術情報が送られます。運営側はIPアドレスを障害調査用ログに10日間保存すると説明しています（<a href="https://github.com/alexfernandez/librecounter/blob/main/doc/tracking.md" target="_blank" rel="noopener noreferrer">公式の取扱説明</a>）。Cookieや診断入力の送信は行いません。集計結果は公開されます。</small><script>fetch("https://librecounter.org/count?url=https%3A%2F%2Fgtakanowork-pixel.github.io%2Fforge-site%2Fautomation-consultation.html",{method:"GET",mode:"no-cors",credentials:"omit",referrerPolicy:"no-referrer",cache:"no-store"}).catch(()=>{});</script></p></footer>
 </body>
