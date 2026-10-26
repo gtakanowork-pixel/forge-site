@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agentforceでナレッジが見つからないときの切り分け手順｜Forge</title>
+<meta name="description" content="Salesforce AgentforceのKnowledge記事が検索・回答に使われないときの確認順序。Data Libraryの索引、公開範囲、権限、Answer Questions with Knowledge、検索語の差を切り分けます。">
+<link rel="canonical" href="https://gtakanowork-pixel.github.io/forge-site/blog/agentforce-knowledge-not-found-troubleshooting.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Agentforceでナレッジが見つからないときの切り分け手順｜Forge">
+<meta property="og:description" content="公開済みのKnowledge記事が回答に使われないとき、どこから確認するか。公式資料に沿った診断順序。">
+<meta property="og:url" content="https://gtakanowork-pixel.github.io/forge-site/blog/agentforce-knowledge-not-found-troubleshooting.html">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="nav wrap"><a class="brand" href="../" aria-label="Forge home"><span class="mark">F</span>FORGE</a><nav><a href="../#services">Services</a><a href="./">Journal</a><a class="nav-cta" href="../automation-consultation.html">30分相談</a></nav></header>
+<main class="wrap section"><article style="max-width:820px">
+<p class="kicker">AI OPERATIONS · 2026.10.26</p>
+<h1 style="font-size:clamp(38px,6vw,66px)">Agentforceでナレッジが<br>見つからないときの切り分け手順。</h1>
+<p class="lead">Knowledge記事は公開済みなのに、Service Agentが「情報が見つかりません」と答える。すぐにプロンプトを増やす前に、<strong>検索対象 → 索引 → アクション → 権限 → 質問表現</strong>を分けて確認します。</p>
+<p>本記事はSalesforce公式資料に基づく一般的な調査手順です。特定顧客の障害報告や修復実績ではありません。AgentforceのUI、機能、ライセンス条件は組織・リリースによって異なるため、利用環境の公式ドキュメントを優先してください。</p>
+
+<h2>最初に「どこで失敗したか」を分ける</h2>
+<p>同じ「回答できない」でも原因は別です。①Data Library自体が割り当てられていない、②検索対象に記事が入っていない、③検索結果はあるが回答に反映されない、④言い換えた質問だけ見つからない、の4パターンに分けます。エージェント全体の回答だけで判断せず、可能なら該当アクションを単独でテストしてください。</p>
+
+<h2>1. Knowledgeの公開状態と検索対象フィールドを確認</h2>
+<p>対象記事の公開状態・言語・データカテゴリ・公開チャネルを確認し、Data Library側の<strong>Knowledgeソース、検索対象の本文フィールド、公開記事への制限、カテゴリ絞り込み</strong>と突き合わせます。本文がカスタム項目にある場合、対象フィールドの選択漏れも候補です。SalesforceのKnowledge Library例では、索引対象のテキスト項目とデータカテゴリの指定が説明されています。</p>
+<p>公開サイト向けエージェントで社内専用記事を参照できるように権限を広げるのは解決策にしません。まず必要な記事だけが公開範囲に含まれるか確認します。</p>
+
+<h2>2. Data Libraryの「作成済み」と「検索可能」を区別</h2>
+<p>ライブラリの存在だけでは索引・Retrieverが使えるとは限りません。検索インデックスやRetrieverの準備状況とエラーを確認します。Salesforce CLIを利用できる管理環境なら、<code>sf agent adl status --library-id &lt;ライブラリID&gt; --target-org &lt;組織エイリアス&gt;</code> でDATA_STREAM、SEARCH_INDEX、RETRIEVERなどの段階を確認できます。組織やCLIの対応バージョンを確認して実行してください。</p>
+<p>索引が未完了・エラーの場合は、失敗段階と公式エラー情報を記録してから対処します。むやみにライブラリを削除・再作成すると、調査の手掛かりや設定を失う可能性があります。</p>
+
+<h2>3. エージェントへの割り当てとKnowledgeアクションを確認</h2>
+<p>Agentforce Builderで、対象エージェントと有効なバージョンに正しいData Libraryが割り当てられているか確認します。次に、使用するサブエージェント（またはトピック）と<strong>Answer Questions with Knowledge</strong>などのアクションが実際に呼び出されるかを確認します。独自Prompt TemplateやRetrieverを使う構成なら、アクションの参照先が想定と一致するかも見ます。</p>
+<p>「アクション単体では記事が返るが、会話では使われない」場合、検索基盤を作り直す前にアクション選択条件・指示・後段の応答加工を切り分けます。根拠のない回答を強制する指示は追加しません。</p>
+
+<h2>4. エージェント実行ユーザーの権限を確認</h2>
+<p>管理者として記事が見えても、エージェント実行時に同じ範囲へアクセスできるとは限りません。Knowledgeへのアクセス、必要な権限セット、Data 360側のアクセス範囲を、実行主体に沿って確認します。権限を一律に管理者相当へ上げず、最小権限で再テストします。</p>
+
+<h2>5. 質問の言い方と記事の用語がずれていないか確認</h2>
+<p>製品の旧称、略語、社内用語、利用者の俗称と、記事に書かれた正式名称が異なると、関連箇所を検索できない場合があります。Salesforce公式のAgent Script例も、この<strong>用語のずれ</strong>を検索失敗の一因として扱っています。まず「記事の見出しそのまま」と「利用者の自然な言い方」の両方でテストし、差が出るか記録します。</p>
+<p>必要なら公開範囲を守りながら用語の対応表や記事の見出しを整えます。回答できない質問に対して、根拠を作り出すのではなく有人窓口などの安全な案内を残します。</p>
+
+<h2>小さなテスト表で再現性を残す</h2>
+<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:14px">
+<thead><tr><th scope="col" style="text-align:left;border-bottom:1px solid #51402d;padding:10px">試験</th><th scope="col" style="text-align:left;border-bottom:1px solid #51402d;padding:10px">期待する確認</th></tr></thead>
+<tbody>
+<tr><td style="padding:10px;border-bottom:1px solid #343438">記事見出しそのまま</td><td style="padding:10px;border-bottom:1px solid #343438">対象記事を検索できるか</td></tr>
+<tr><td style="padding:10px;border-bottom:1px solid #343438">同義語・略語で質問</td><td style="padding:10px;border-bottom:1px solid #343438">用語差による検索漏れがないか</td></tr>
+<tr><td style="padding:10px;border-bottom:1px solid #343438">根拠のない質問</td><td style="padding:10px;border-bottom:1px solid #343438">推測で断定せず保留できるか</td></tr>
+<tr><td style="padding:10px;border-bottom:1px solid #343438">公開不可の情報を質問</td><td style="padding:10px;border-bottom:1px solid #343438">権限外の情報を回答しないか</td></tr>
+</tbody></table></div>
+<p>テスト結果には環境・エージェント版・ライブラリの索引状態・質問の種類・アクション結果を記録します。顧客の氏名、実際の問い合わせ本文、認証情報は検証記録にコピーせず、架空の質問で再現してください。</p>
+
+<h2>Salesforce公式資料</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/ai/agentforce/guide/adl-get-started-knowledge-library.html" target="_blank" rel="noopener noreferrer">Knowledge Libraryの索引対象・カテゴリ設定 ↗</a></li>
+<li><a href="https://developer.salesforce.com/docs/platform/salesforce-cli-reference/guide/cli_reference_agent_adl_status.html" target="_blank" rel="noopener noreferrer">CLI：Data Libraryの索引ステータス確認 ↗</a></li>
+<li><a href="https://developer.salesforce.com/docs/ai/agentforce/guide/error-ref-agentforce-data-library.html" target="_blank" rel="noopener noreferrer">Data Libraryサービスのエラー参照 ↗</a></li>
+<li><a href="https://trailhead.salesforce.com/content/learn/modules/agent-behavior-troubleshooting-in-agentforce/fix-configuration-and-data-issues" target="_blank" rel="noopener noreferrer">Trailhead：構成・データ・引用の切り分け ↗</a></li>
+<li><a href="https://developer.salesforce.com/docs/ai/agentforce/guide/ascript-example-rag-jargon.html" target="_blank" rel="noopener noreferrer">Agent Script：検索語と用語のずれ ↗</a></li>
+</ul>
+<p><small>Forgeによる独立した技術解説です。Salesforce社との提携・認定・成果保証を示すものではありません。Salesforce、Agentforceは各権利者の商標です。</small></p>
+<p>公開前の全体チェックは<a href="agentforce-service-agent-web-deployment-checklist.html">Service AgentをWeb公開する前の6項目</a>も参照してください。</p>
+<section style="margin:48px 0;padding:26px;border:1px solid #51402d;background:#111113">
+<h2 style="margin-top:0">FAQの回答範囲や運用を整理したい場合</h2>
+<p>Forgeでは、問い合わせ業務を1つ選び、参照すべき情報、人が確認する箇所、回答不能時の導線を整理する相談を受け付けています。Salesforce環境への個別対応・料金・実施可否は事前確認です。初回の連絡に顧客情報や設定画面の機密情報は不要です。</p>
+<p><a class="button primary" href="../automation-consultation.html">30分ミニ診断の相談方法を見る →</a></p>
+</section>
+<p><a href="./">← 実践ノート一覧へ戻る</a></p>
+</article></main>
+<footer class="wrap"><div class="brand"><span class="mark">F</span>FORGE</div><p>AI employees. Human judgment.</p><p>© 2026 Forge</p></footer>
+</body></html>
