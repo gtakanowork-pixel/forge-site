@@ -6,7 +6,8 @@
     audit: "audit-instagram-click",
     consultation: "consultation-instagram-click",
     roi: "roi-instagram-click",
-    support: "support-instagram-click"
+    support: "support-instagram-click",
+    agentforce: "agentforce-dm-click"
   };
   var eventBase = "https://gtakanowork-pixel.github.io/forge-site/__events__/";
   document.querySelectorAll("a[data-forge-instagram-outbound]").forEach(function (link) {
