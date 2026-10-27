@@ -14,10 +14,10 @@
   document.querySelectorAll("a[data-forge-instagram-outbound]").forEach(function (link) {
     var key = link.getAttribute("data-forge-instagram-outbound");
     if (!Object.prototype.hasOwnProperty.call(events, key)) return;
-    // Split direct DM and profile fallback routes on the homepage and consultation
-    // page. Historic combined click series are not backfilled or treated as leads.
+    // Split direct DM and profile fallback routes on homepage, consultation and audit.
+    // Historic combined click series are not backfilled or treated as leads.
     var eventName = events[key];
-    if (key === "home" || key === "consultation") {
+    if (key === "home" || key === "consultation" || key === "audit") {
       var destination = new URL(link.href);
       if (destination.hostname === "ig.me") {
         eventName = key + "-dm-click";
