@@ -3,3 +3,8 @@
 a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #ffbd68;outline-offset:3px}
 @media(max-width:360px){.nav nav{gap:12px}.nav nav a{font-size:11px}.nav-cta{padding:8px 10px}.brand{gap:7px;font-size:11px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+/* Existing audit checkboxes: make aria-checked selection visually perceivable.
+   !important overrides the legacy inline button background/border styles. */
+button[role="checkbox"][aria-checked="true"]{background:#3b2b1c!important;border-color:#ffbd68!important;box-shadow:inset 4px 0 0 #ffbd68}
+button[role="checkbox"][aria-checked="true"]::before{content:"✓ ";color:#ffbd68;font-weight:700}
