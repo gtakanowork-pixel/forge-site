@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Enhanced Web Chatの事前入力が反映されないときの確認手順｜Forge</title>
+<meta name="description" content="Salesforce Enhanced Web Chatで事前入力が表示されないときの切り分け。onEmbeddedMessagingReady、チャネル変数名、visible/hiddenの違い、開始前の設定タイミングを公式資料に沿って確認します。">
+<link rel="canonical" href="https://gtakanowork-pixel.github.io/forge-site/blog/enhanced-web-chat-prechat-fields-troubleshooting.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Enhanced Web Chatの事前入力が反映されないときの確認手順｜Forge">
+<meta property="og:description" content="prechatAPIが効かないとき、イベント・フィールド・実行順序を分けて調べる実務ガイド。">
+<meta property="og:url" content="https://gtakanowork-pixel.github.io/forge-site/blog/enhanced-web-chat-prechat-fields-troubleshooting.html">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="nav wrap"><a class="brand" href="../" aria-label="Forge home"><span class="mark">F</span>FORGE</a><nav><a href="../#services">Services</a><a href="./">Journal</a><a class="nav-cta" href="../ai-automation-audit.html">3分診断</a></nav></header>
+<main class="wrap section"><article style="max-width:820px">
+<p class="kicker">AI OPERATIONS · 2026.10.30</p>
+<h1 style="font-size:clamp(38px,6vw,64px)">Enhanced Web Chatで<br>事前入力が反映されないとき。</h1>
+<p class="lead">SalesforceのWebチャットで事前入力した値が表示されない。コードを何度も書き換える前に、<strong>対象製品・フィールド設定・初期化イベント・会話開始の順番</strong>を分けて確認します。</p>
+<p>本記事はSalesforce公式開発者資料をもとにした一般的な検証手順です。特定企業の導入事例・障害実績ではありません。組織のリリース、チャネル構成、権限によって利用可能な設定は異なります。</p>
+<h2>1. まず「Enhanced Web Chat」か確認する</h2>
+<p>古いEmbedded Service Chatのコード例にある <code>embedded_svc.settings.prepopulatedPrechatFields</code> と、Enhanced Web Chatの <code>embeddedservice_bootstrap.prechatAPI</code> は別の仕組みです。検索結果に出てきた旧製品のサンプルをそのまま貼り付けず、導入済みチャネルとSalesforceが発行した埋め込みスニペットを確認してください。</p>
+<h2>2. visible と hidden を混同しない</h2>
+<p><strong>Visible pre-chat</strong>は利用者に表示する事前入力欄です。対象の欄を事前にフォームへ追加したうえで、<code>setVisiblePrechatFields</code> を呼びます。<strong>Hidden pre-chat</strong>はフォームに表示しない情報を渡す別経路で、<code>setHiddenPrechatFields</code> を使います。表示されないことだけで「送信されていない」とは断定できません。どちらを設計したのかを先に整理します。</p>
+<h2>3. フィールド名は画面のラベルではなくチャネル変数名</h2>
+<p>VisibleのキーはSalesforceの<strong>Messaging Settings → 対象チャネル → Parameter Mappings</strong>にあるチャネル変数名を使います。標準の例は <code>_firstName</code>、<code>_lastName</code>、<code>_email</code>、<code>_subject</code> です。独自項目は組織で設定した変数名を確認してください。画面の「件名」などの表示ラベルをキーとして指定しても一致しません。</p>
+<h2>4. APIは ready イベント後、会話開始前に呼ぶ</h2>
+<p><code>onEmbeddedMessagingReady</code> はAPIが使用可能になった合図です。Salesforce公式手順では、このイベントの後、会話が始まる前にpre-chat APIを呼びます。イベントの登録自体はSalesforce提供スニペットの初期化より前に行い、利用者の入力値を勝手に固定しないよう、編集可能な設定から試してください。</p>
+<p>次は<strong>架空の件名だけ</strong>を設定する最小例です。実際には、対象チャネルのVisible pre-chatに <code>_subject</code> があることを先に確認してください。既存のSalesforceスニペット全体を置き換えるコードではありません。</p>
+<pre style="white-space:pre-wrap;overflow-wrap:anywhere;padding:18px;border:1px solid #51402d;background:#111113"><code>window.addEventListener('onEmbeddedMessagingReady', () =&gt; {
+  window.embeddedservice_bootstrap.prechatAPI
+    .setVisiblePrechatFields({
+      _subject: {
+        value: '動作確認',
+        isEditableByEndUser: true
+      }
+    });
+});
+// このリスナーを登録してから、Salesforce提供スニペットで初期化する</code></pre>
+<p>画面に反映されない場合は、イベントが発火したか、<code>prechatAPI</code> が存在するか、変数名が一致するか、対象フォームに欄があるかを順に確認します。設定後に既に会話が開始していないかも切り分けます。</p>
+<h2>5. 値の変更・削除も開始前にテストする</h2>
+<p>Visibleの事前入力を解除するには <code>unsetVisiblePrechatFields</code>、Hiddenを解除するには <code>removeHiddenPrechatFields</code> を使います。ログアウト、別ユーザーへの切替、再訪問などで前の利用者の値を残さない設計が必要です。認証済みユーザーのセッション継続・本人確認は別の仕様なので、単なる事前入力を本人確認の代わりに使わないでください。</p>
+<h2>架空データだけで行う5つの確認</h2>
+<ol>
+<li>公式スニペットで、事前入力なしのチャットが正常に開く。</li>
+<li><code>onEmbeddedMessagingReady</code> の発火を確認する。</li>
+<li>フォームに設定したVisible項目とチャネル変数名が一致する。</li>
+<li>架空の件名を設定し、会話開始前のフォームに反映される。</li>
+<li>値の削除・再初期化を試し、前回の値が意図せず残らない。</li>
+</ol>
+<p>検証時は顧客名、実メールアドレス、アクセストークン、チャット履歴をログやスクリーンショットに含めず、架空データで再現してください。環境ごとの正式な権限・セキュリティ設定はSalesforce管理者と確認します。</p>
+<h2>Salesforce公式資料</h2>
+<ul>
+<li><a href="https://developer.salesforce.com/docs/service/messaging-web/guide/populate-prechat-fields.html" target="_blank" rel="noopener noreferrer">Visible pre-chatの設定手順 ↗</a></li>
+<li><a href="https://developer.salesforce.com/docs/service/messaging-web/references/m4w-reference/prechatAPI.html" target="_blank" rel="noopener noreferrer">prechatAPIのメソッド・引数 ↗</a></li>
+<li><a href="https://developer.salesforce.com/docs/service/messaging-web/guide/pre-chat.html" target="_blank" rel="noopener noreferrer">Hidden pre-chatの設定手順 ↗</a></li>
+<li><a href="https://developer.salesforce.com/docs/service/messaging-web/guide/user-verification.html" target="_blank" rel="noopener noreferrer">User Verificationとセッション継続 ↗</a></li>
+</ul>
+<p><small>2026年10月30日時点で参照した公式資料に基づきます。Forgeによる独立した技術解説であり、Salesforce社との提携・認定や実装成果を示すものではありません。Salesforce、Agentforceは各権利者の商標です。</small></p>
+<p>Web公開前の全体チェックは<a href="agentforce-service-agent-web-deployment-checklist.html">Service AgentをWeb公開する前の6項目</a>も参照してください。</p>
+<p><a href="./">← 実践ノート一覧へ戻る</a></p>
+</article></main>
+<footer class="wrap"><div class="brand"><span class="mark">F</span>FORGE</div><p>AI employees. Human judgment.</p><p>© 2026 Forge</p></footer>
+</body></html>
